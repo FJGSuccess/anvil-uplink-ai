@@ -61,4 +61,35 @@ def extract_user_data_from_file(file):
     import json
     return json.loads(reply_text)
 
+@anvil.server.callable
+def generate_preview_from_user_data(user_data):
+    # Rebuild the same prompt using the existing fields
+    prompt = f"""
+    Based on the following user-entered data, create a summary strategy preview.
+
+    BRAND:
+    {user_data.get("brand_kit", {})}
+
+    NICHE:
+    {user_data.get("niche", {})}
+
+    AVATAR:
+    {user_data.get("avatar", {})}
+
+    OFFER:
+    {user_data.get("offer", {})}
+
+    Return only a human-readable paragraph preview.
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.5,
+    )
+
+    preview_text = response.choices[0].message.content.strip()
+    return preview_text
+
+
 anvil.server.wait_forever()
