@@ -6,15 +6,9 @@ import fitz  # PyMuPDF
 import io
 import mimetypes
 import os
+from openai import OpenAI
 
-
-# Connect to Anvil
-anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# Set your OpenAI API key
-openai.api_key = "your-openai-api-key-here"
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @anvil.server.callable
 def extract_user_data_from_file(file):
@@ -53,18 +47,16 @@ def extract_user_data_from_file(file):
     - offer (name, price, format, promise, pillars[], faqs[])
     """
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    reply_text = response["choices"][0]["message"]["content"]
+    reply_text = response.choices[0].message.content
     print("🤖 GPT Response:\n", reply_text[:500])
 
-    # Let GPT respond with proper JSON formatting
     import json
     return json.loads(reply_text)
 
-# Start the Uplink listener
 anvil.server.wait_forever()
