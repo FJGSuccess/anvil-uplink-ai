@@ -5,6 +5,8 @@ from PIL import Image
 import fitz  # PyMuPDF
 import io
 import mimetypes
+import os
+
 
 # Connect to Anvil
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
