@@ -8,6 +8,8 @@ import mimetypes
 import os
 from openai import OpenAI
 
+anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @anvil.server.callable
