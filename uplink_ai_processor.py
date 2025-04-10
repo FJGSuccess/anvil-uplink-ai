@@ -9,6 +9,8 @@ import mimetypes
 # Connect to Anvil
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
 
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # Set your OpenAI API key
 openai.api_key = "your-openai-api-key-here"
 
