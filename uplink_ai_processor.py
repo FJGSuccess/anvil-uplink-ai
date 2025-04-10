@@ -50,9 +50,9 @@ def extract_user_data_from_file(file):
     """
 
     response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.5,
+    model="gpt-3.5-turbo",  # ← updated
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.5,
     )
 
     reply_text = response.choices[0].message.content
