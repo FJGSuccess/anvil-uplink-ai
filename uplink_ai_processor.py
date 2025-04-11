@@ -8,14 +8,15 @@ import mimetypes
 import os
 from openai import OpenAI
 
+# ✅ Connect to Anvil using your Uplink key
+anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @anvil.server.callable
 def extract_user_data_from_file(file):
-    # Read bytes and determine file type
     file_bytes = file.get_bytes()
     mime_type, _ = mimetypes.guess_type(file.name)
-
     extracted_text = ""
 
     if mime_type in ["application/pdf"]:
@@ -55,7 +56,7 @@ def extract_user_data_from_file(file):
     import json
     import re
 
-    match = re.search(r'({.*})(.*)', reply_text, re.DOTALL)
+    match = re.search(r'(\{.*\})(.*)', reply_text, re.DOTALL)
     if match:
         json_data = match.group(1)
         preview = match.group(2).strip()
