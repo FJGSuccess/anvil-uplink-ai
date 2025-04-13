@@ -6,20 +6,23 @@ import fitz  # PyMuPDF
 import io
 import mimetypes
 import os
+import json
+import re
 
-# ✅ Connect to Anvil using your Uplink key
+# ✅ Connect to Anvil
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
 
-# ✅ Set your OpenAI key
+# ✅ Load OpenAI key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# 📥 File Upload Processor (PDF, JPG, PNG)
 @anvil.server.callable
 def extract_user_data_from_file(file):
     file_bytes = file.get_bytes()
     mime_type, _ = mimetypes.guess_type(file.name)
     extracted_text = ""
 
-    if mime_type in ["application/pdf"]:
+    if mime_type == "application/pdf":
         doc = fitz.open(stream=file_bytes, filetype="pdf")
         extracted_text = "\n".join([page.get_text() for page in doc])
     elif mime_type in ["image/jpeg", "image/png"]:
@@ -28,7 +31,7 @@ def extract_user_data_from_file(file):
     else:
         raise Exception("Unsupported file type. Please upload a PDF or image file.")
 
-    print("📄 Extracted text:", extracted_text[:500])
+    print("📄 Extracted text:", extracted_text[:300])
 
     prompt = f"""
     Based on the following extracted content, create structured data for a brand strategy:
@@ -44,19 +47,16 @@ def extract_user_data_from_file(file):
     After the JSON, include a human-readable summary preview of the strategy in paragraph form.
     """
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    reply_text = response.choices[0].message["content"]
-    print("🤖 GPT Response:\n", reply_text[:500])
+    reply = response.choices[0].message.content
+    print("🤖 GPT response:\n", reply[:300])
 
-    import json
-    import re
-
-    match = re.search(r'(\{.*\})(.*)', reply_text, re.DOTALL)
+    match = re.search(r'(\{.*\})(.*)', reply, re.DOTALL)
     if match:
         json_data = match.group(1)
         preview = match.group(2).strip()
@@ -64,8 +64,9 @@ def extract_user_data_from_file(file):
         data['preview'] = preview
         return data
     else:
-        return json.loads(reply_text)
+        return json.loads(reply)
 
+# 🧠 Generate Preview from Filled Forms
 @anvil.server.callable
 def generate_preview_from_user_data(user_data):
     prompt = f"""
@@ -86,14 +87,15 @@ def generate_preview_from_user_data(user_data):
     Return only a human-readable paragraph preview.
     """
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    return response.choices[0].message["content"].strip()
+    return response.choices[0].message.content.strip()
 
+# 📲 Generate Social Content Posts
 @anvil.server.callable
 def generate_social_posts(user_data, num_posts, platform, content_type):
     brand = user_data.get("brand_kit", {})
@@ -112,34 +114,33 @@ Ideal Client Avatar: {avatar}
 Offer: {offer}
 
 Each post should include:
-- \"text\": a caption or short-form content block (hook + 2–4 sentence value)
-- \"cta\": a call-to-action line
-- \"hashtags\": relevant, niche-specific tags
-- \"image_prompt\": a visual idea or scene to pair with this post
+- "text": a caption or short-form content block (hook + value)
+- "cta": a compelling call to action
+- "hashtags": relevant hashtags
+- "image_prompt": visual prompt for matching imagery
 
-Return only a list of dictionaries like this:
+Return ONLY a JSON array like this:
 [
   {{
-    \"text\": \"...\",
-    \"cta\": \"...\",
-    \"hashtags\": \"...\",
-    \"image_prompt\": \"...\"
+    "text": "...",
+    "cta": "...",
+    "hashtags": "...",
+    "image_prompt": "..."
   }},
   ...
 ]
 """
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
     )
 
-    import json
     try:
-        return json.loads(response.choices[0].message["content"])
+        return json.loads(response.choices[0].message.content)
     except Exception as e:
-        raise Exception(f"Could not parse GPT response: {e}")
+        raise Exception(f"❌ Could not parse GPT response: {e}")
 
-# ✅ Keep this at the bottom to run the Uplink
+# ⏳ Keep server alive
 anvil.server.wait_forever()
