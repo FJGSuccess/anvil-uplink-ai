@@ -15,10 +15,10 @@ from anvil import BlobMedia
 # ✅ Connect to Anvil
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
 
-# ✅ Load OpenAI key
+# ✅ Load OpenAI API key from environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 📥 Extract text from uploaded PDFs or images
+# 📥 Extract text from PDF or image
 @anvil.server.callable
 def extract_user_data_from_file(file):
     file_bytes = file.get_bytes()
@@ -32,7 +32,7 @@ def extract_user_data_from_file(file):
         image = Image.open(io.BytesIO(file_bytes))
         extracted_text = pytesseract.image_to_string(image)
     else:
-        raise Exception("Unsupported file type. Please upload a PDF or image file.")
+        raise Exception("Unsupported file type. Please upload a PDF or image.")
 
     print("📄 Extracted text:", extracted_text[:300])
 
@@ -57,7 +57,7 @@ def extract_user_data_from_file(file):
     )
 
     reply = response.choices[0].message.content
-    print("🤖 GPT response:\n", reply[:300])
+    print("🤖 GPT Response:\n", reply[:300])
 
     match = re.search(r'(\{.*\})(.*)', reply, re.DOTALL)
     if match:
@@ -69,7 +69,7 @@ def extract_user_data_from_file(file):
     else:
         return json.loads(reply)
 
-# 🧠 Generate preview paragraph from user input
+# 🧠 Generate preview paragraph
 @anvil.server.callable
 def generate_preview_from_user_data(user_data):
     prompt = f"""
@@ -98,7 +98,7 @@ def generate_preview_from_user_data(user_data):
 
     return response.choices[0].message.content.strip()
 
-# ✨ Generate social posts
+# ✨ Generate social media post content
 @anvil.server.callable
 def generate_social_posts(user_data, num_posts, platform, content_type):
     brand = user_data.get("brand_kit", {})
@@ -145,25 +145,28 @@ Return ONLY a JSON array like this:
     except Exception as e:
         raise Exception(f"❌ Could not parse GPT response: {e}")
 
-# 💾 Export generated posts to Google Drive (anviluploads folder)
+# 📤 Export posts to Google Drive as CSV
 @anvil.server.callable
 def export_posts_to_drive(posts):
     csv_lines = ["Platform,Text,CTA,Hashtags,Image Prompt"]
+
     for post in posts:
-        csv_lines.append(
-            f"{post.get('platform','')},"
-            f"\"{post.get('text','').replace('\"', '\"\"')}\","
-            f"\"{post.get('cta','').replace('\"', '\"\"')}\","
-            f"{post.get('hashtags','')},"
-            f"\"{post.get('image_prompt','').replace('\"', '\"\"')}\""
-        )
+        platform = post.get("platform", "")
+        text = post.get("text", "").replace('"', '""')
+        cta = post.get("cta", "").replace('"', '""')
+        hashtags = post.get("hashtags", "")
+        image_prompt = post.get("image_prompt", "").replace('"', '""')
+
+        row = f'{platform},"{text}","{cta}",{hashtags},"{image_prompt}"'
+        csv_lines.append(row)
+
     csv_data = "\n".join(csv_lines)
     filename = f"Generated_Posts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     file_blob = BlobMedia("text/csv", csv_data.encode("utf-8"), name=filename)
 
-    # Save to app_files.anviluploads folder
+    # Save to App Files folder: anviluploads
     anvil.google.drive.app_files.anviluploads[filename] = file_blob
     return filename
 
-# 🌀 Keep alive
+# Keep server alive
 anvil.server.wait_forever()
