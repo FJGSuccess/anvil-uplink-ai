@@ -6,12 +6,12 @@ import fitz  # PyMuPDF
 import io
 import mimetypes
 import os
-from openai import OpenAI
 
 # ✅ Connect to Anvil using your Uplink key
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# ✅ Set your OpenAI key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @anvil.server.callable
 def extract_user_data_from_file(file):
@@ -44,13 +44,13 @@ def extract_user_data_from_file(file):
     After the JSON, include a human-readable summary preview of the strategy in paragraph form.
     """
 
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    reply_text = response.choices[0].message.content
+    reply_text = response.choices[0].message["content"]
     print("🤖 GPT Response:\n", reply_text[:500])
 
     import json
@@ -86,16 +86,16 @@ def generate_preview_from_user_data(user_data):
     Return only a human-readable paragraph preview.
     """
 
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    return response.choices[0].message.content.strip()
+    return response.choices[0].message["content"].strip()
 
 @anvil.server.callable
-def generate_social_posts(user_data, platform, num_posts):
+def generate_social_posts(user_data, num_posts, platform, content_type):
     brand = user_data.get("brand_kit", {})
     niche = user_data.get("niche", {})
     avatar = user_data.get("avatar", {})
@@ -104,7 +104,7 @@ def generate_social_posts(user_data, platform, num_posts):
     prompt = f"""
 You are a top-tier social media strategist.
 
-Create {num_posts} high-performing social media post(s) for {platform}.
+Create {num_posts} high-performing social media post(s) for {platform} in the format of a {content_type}.
 
 Brand: {brand}
 Niche: {niche}
@@ -112,22 +112,34 @@ Ideal Client Avatar: {avatar}
 Offer: {offer}
 
 Each post should include:
-- A hook (first line that grabs attention)
-- 2–4 sentences of valuable content
-- A CTA (call to action)
+- \"text\": a caption or short-form content block (hook + 2–4 sentence value)
+- \"cta\": a call-to-action line
+- \"hashtags\": relevant, niche-specific tags
+- \"image_prompt\": a visual idea or scene to pair with this post
 
-Tailor it to match {platform}'s style, tone, and ideal formatting (e.g. short for Twitter, vertical focus for TikTok, caption-rich for Instagram, professional for LinkedIn).
-
-Return each post as a plain text block. No titles or extra formatting.
+Return only a list of dictionaries like this:
+[
+  {{
+    \"text\": \"...\",
+    \"cta\": \"...\",
+    \"hashtags\": \"...\",
+    \"image_prompt\": \"...\"
+  }},
+  ...
+]
 """
 
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
     )
 
-    full_text = response.choices[0].message.content.strip()
-    return full_text.split("\n\n")[:num_posts]
+    import json
+    try:
+        return json.loads(response.choices[0].message["content"])
+    except Exception as e:
+        raise Exception(f"Could not parse GPT response: {e}")
 
+# ✅ Keep this at the bottom to run the Uplink
 anvil.server.wait_forever()
