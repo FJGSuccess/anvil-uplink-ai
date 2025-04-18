@@ -132,7 +132,7 @@ def generate_social_posts(user_data, num_posts, platform, content_type):
 def export_posts_to_drive(posts):
     csv_data = "Platform,Text,CTA,Hashtags,Image Prompt\n"
     for row in posts:
-        csv_data += ",".join(f'"{str(field).replace("\"", "'")}"' for field in [
+        csv_data += ",".join(f'"{str(field).replace('"', "'")}"' for field in [
             row.get("platform", ""),
             row.get("text", ""),
             row.get("cta", ""),
