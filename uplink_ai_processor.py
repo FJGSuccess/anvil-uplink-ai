@@ -156,7 +156,7 @@ def export_posts_to_drive(generated_posts):
 
     csv_data = ",".join(f'"{header}"' for header in headers) + "\n"
     for row in rows:
-        csv_data += ",".join(f'"{field.replace("\"", "\'")}"' for field in row) + "\n"
+        csv_data += ",".join('"' + field.replace('"', "'") + '"' for field in row) + "\n"
 
     filename = f"social_posts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     file = anvil.BlobMedia("text/csv", csv_data.encode("utf-8"), name=filename)
