@@ -1,40 +1,38 @@
+
 import anvil.server
+import anvil.media
 import openai
+import os
+import requests
+import mimetypes
+import fitz  # PyMuPDF
 import pytesseract
 from PIL import Image
-import fitz  # PyMuPDF
 import io
-import mimetypes
-import os
-import json
-import re
-from datetime import datetime
-import anvil.google.drive
-from anvil import BlobMedia
 
-# ✅ Connect to Anvil
+# Connect to Anvil
 anvil.server.connect("server_PHCQQZWPSVM25CEAVZVC5QQP-I7XBYA5TZTZ5PIRM")
 
-# ✅ Load OpenAI API key from environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# OpenAI Client Setup
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 📥 Extract text from PDF or image
+PEXELS_API_KEY = "bveTpyRBwOqHGBk59IGiQQU3JIybHbk9ouM9tTJCLgf0s6HeIraG4MAb"
+PEXELS_URL = "https://api.pexels.com/v1/search"
+
 @anvil.server.callable
 def extract_user_data_from_file(file):
     file_bytes = file.get_bytes()
     mime_type, _ = mimetypes.guess_type(file.name)
     extracted_text = ""
 
-    if mime_type == "application/pdf":
+    if mime_type in ["application/pdf"]:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
         extracted_text = "\n".join([page.get_text() for page in doc])
     elif mime_type in ["image/jpeg", "image/png"]:
         image = Image.open(io.BytesIO(file_bytes))
         extracted_text = pytesseract.image_to_string(image)
     else:
-        raise Exception("Unsupported file type. Please upload a PDF or image.")
-
-    print("📄 Extracted text:", extracted_text[:300])
+        raise Exception("Unsupported file type. Please upload a PDF or image file.")
 
     prompt = f"""
     Based on the following extracted content, create structured data for a brand strategy:
@@ -50,16 +48,17 @@ def extract_user_data_from_file(file):
     After the JSON, include a human-readable summary preview of the strategy in paragraph form.
     """
 
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
     )
 
-    reply = response.choices[0].message.content
-    print("🤖 GPT Response:\n", reply[:300])
+    reply_text = response.choices[0].message.content
+    import json
+    import re
 
-    match = re.search(r'(\{.*\})(.*)', reply, re.DOTALL)
+    match = re.search(r'(\{.*\})(.*)', reply_text, re.DOTALL)
     if match:
         json_data = match.group(1)
         preview = match.group(2).strip()
@@ -67,9 +66,8 @@ def extract_user_data_from_file(file):
         data['preview'] = preview
         return data
     else:
-        return json.loads(reply)
+        return json.loads(reply_text)
 
-# 🧠 Generate preview paragraph
 @anvil.server.callable
 def generate_preview_from_user_data(user_data):
     prompt = f"""
@@ -90,7 +88,7 @@ def generate_preview_from_user_data(user_data):
     Return only a human-readable paragraph preview.
     """
 
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
@@ -98,7 +96,6 @@ def generate_preview_from_user_data(user_data):
 
     return response.choices[0].message.content.strip()
 
-# ✨ Generate social media post content
 @anvil.server.callable
 def generate_social_posts(user_data, num_posts, platform, content_type):
     brand = user_data.get("brand_kit", {})
@@ -107,9 +104,9 @@ def generate_social_posts(user_data, num_posts, platform, content_type):
     offer = user_data.get("offer", {})
 
     prompt = f"""
-You are a top-tier social media strategist.
+You are a top-tier social media strategist and marketing expert.
 
-Create {num_posts} high-performing social media post(s) for {platform} in the format of a {content_type}.
+Create {num_posts} high-performing {content_type} social media post(s) for {platform}.
 
 Brand: {brand}
 Niche: {niche}
@@ -117,56 +114,64 @@ Ideal Client Avatar: {avatar}
 Offer: {offer}
 
 Each post should include:
-- "text": a caption or short-form content block (hook + value)
-- "cta": a compelling call to action
-- "hashtags": relevant hashtags
-- "image_prompt": visual prompt for matching imagery
+- A hook (first line that grabs attention)
+- 2–4 sentences of valuable content
+- A CTA (call to action)
+- A short image prompt (for visuals)
 
-Return ONLY a JSON array like this:
-[
-  {{
-    "text": "...",
-    "cta": "...",
-    "hashtags": "...",
-    "image_prompt": "..."
-  }},
-  ...
-]
+Tailor it to match {platform}'s style and format.
+
+Return the result as a JSON list with keys: text, cta, hashtags, image_prompt.
 """
 
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
     )
 
+    import json
     try:
-        return json.loads(response.choices[0].message.content)
-    except Exception as e:
-        raise Exception(f"❌ Could not parse GPT response: {e}")
+        return json.loads(response.choices[0].message.content.strip())
+    except json.JSONDecodeError:
+        raise Exception("Invalid response format from OpenAI")
 
-# 📤 Export posts to Google Drive as CSV
 @anvil.server.callable
 def export_posts_to_drive(posts):
-    csv_lines = ["Platform,Text,CTA,Hashtags,Image Prompt"]
+    from anvil.google.drive import app_files
+    import csv
 
+    csv_data = "Platform,Text,CTA,Hashtags,Image Prompt\n"
     for post in posts:
-        platform = post.get("platform", "")
-        text = post.get("text", "").replace('"', '""')
-        cta = post.get("cta", "").replace('"', '""')
-        hashtags = post.get("hashtags", "")
-        image_prompt = post.get("image_prompt", "").replace('"', '""')
+        row = [post.get("platform", ""), post.get("text", ""), post.get("cta", ""),
+               post.get("hashtags", ""), post.get("image_prompt", "")]
+        csv_data += ",".join(f'"{field.replace('"', "'")}"' for field in row) + "\n"
 
-        row = f'{platform},"{text}","{cta}",{hashtags},"{image_prompt}"'
-        csv_lines.append(row)
+    file = anvil.BlobMedia("text/csv", csv_data.encode("utf-8"), name="posts_export.csv")
+    app_files.posts_export_csv = file
+    return "Uploaded to Google Drive"
 
-    csv_data = "\n".join(csv_lines)
-    filename = f"Generated_Posts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    file_blob = BlobMedia("text/csv", csv_data.encode("utf-8"), name=filename)
+@anvil.server.callable
+def get_pexels_images(prompts, per_prompt=3):
+    headers = {"Authorization": PEXELS_API_KEY}
+    results = {}
 
-    # Save to App Files folder: anviluploads
-    anvil.google.drive.app_files.anviluploads[filename] = file_blob
-    return filename
+    for prompt in prompts:
+        params = {
+            "query": prompt,
+            "per_page": per_prompt
+        }
+        r = requests.get(PEXELS_URL, headers=headers, params=params)
+        if r.status_code == 200:
+            photos = r.json().get("photos", [])
+            results[prompt] = [{
+                "src": p["src"]["medium"],
+                "photographer": p["photographer"],
+                "url": p["url"]
+            } for p in photos]
+        else:
+            results[prompt] = []
 
-# Keep server alive
+    return results
+
 anvil.server.wait_forever()
