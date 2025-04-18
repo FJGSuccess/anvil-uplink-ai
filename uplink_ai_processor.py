@@ -132,13 +132,15 @@ def generate_social_posts(user_data, num_posts, platform, content_type):
 def export_posts_to_drive(posts):
     csv_data = "Platform,Text,CTA,Hashtags,Image Prompt\n"
     for row in posts:
-        csv_data += ",".join(['"{}"'.format(str(field).replace('"', "'")) for field in [
-            row.get("platform", ""),
-            row.get("text", ""),
-            row.get("cta", ""),
-            row.get("hashtags", ""),
-            row.get("image_prompt", "")
-        ]) + "\n"
+        csv_data += ",".join(
+            ['"{}"'.format(str(field).replace('"', "'")) for field in [
+                row.get("platform", ""),
+                row.get("text", ""),
+                row.get("cta", ""),
+                row.get("hashtags", ""),
+                row.get("image_prompt", "")
+            ]]
+        ) + "\n"
 
     file = app_files.anviluploads.create_file("social_posts.csv", csv_data.encode("utf-8"))
     return file.get_url()
