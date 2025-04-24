@@ -2,8 +2,8 @@ import anvil.server
 import openai
 import os
 
-# Connect to Anvil Uplink using your Uplink key
-anvil.server.connect(os.getenv("ANVIL_UPLINK_KEY"))  # Securely stored in Render environment
+# Connect to Anvil Uplink using your Uplink key (set in Render's environment settings)
+anvil.server.connect(os.getenv("ANVIL_UPLINK_KEY"))
 
 # Set your OpenAI API key from environment variables
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -22,4 +22,5 @@ def ask_ai(prompt):
     except Exception as e:
         return f"⚠️ Error: {str(e)}"
 
+# Start listening for incoming Anvil requests
 anvil.server.wait_forever()
