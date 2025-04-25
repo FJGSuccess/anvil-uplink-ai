@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "sorteknowledgebase",
+  "private_key_id": "90a0c8062e650d6bb87cf73e6b45c790b8fe98e1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCLHXaEX9EPUe/4\n8/J3NaKGNDohSAGE/isGOamUoP3NTbOqFkdFYJmVT9C86gaK188w3VtcpbhZ9VNq\n0M5UY/COYwmk8iNE9DVXczdR2SyJ1DLw5npZWplZvy4UUHE+ibxyvDRy33hCV4tk\nIFvsEAEA2vrJORgwY7IWy79xGTpi7pOgQ9rtrj/jcG9Ge4mRE+ptL20NTRCaXmqF\nw+rAXyY4KTO0+IjKMscXDVqqfHJU8xnsiTs0snBHVTNqs/AIA8Hq6X9traucbfiz\npgbtjFmPkvzmwf32z3jRZ5KdyF0MgEbIRjgb8bWJ0EkPgwAgAG85ubxQKe3Lx/bg\n80GLU04TAgMBAAECggEAEos64Spkk8Y4Vtct2vYrU/hiR01x5mh7E7lcAZP0QQm6\niVGu7nCSCHU7PfN0K83YsIrRQuhUSqmJFRQAbP9lcZWCE5qzWN20vpN9LEvmw/il\nUbdnV8Hb7zqsychvUAbMN/8efrGLNky1KAOoPS9k8tg91dTmhIzFkIRYYJscTVON\nyi3HD7KGZi+ErxXkXYJ2vGCY8gnP0lQcrjzW12/7uKVSAi4D2JdC93sJIyxemENC\nkFPwB0sm4QsH7dO+q+sUYzBH5kgQ0WChrICcIVnZP11r/7kn86dU5benQa3d+ufD\nhzvfx7VKFuJp7qOXe/lOmAbM5PFI26O3i7zTwISoAQKBgQC9vAXzBbm3VFwxQlg7\najrA3kvIyAzY60CaBJlhbkLhtB6O7ilA70jhXmnQOF+wlp78qlFZR8mXmh+k7tJq\nF5dlA53/joPavc9S/SnS39CeDXQvRa3yUvHQuheFD4dHltXW1rSWtdTt91efvr3G\nK1rLHkP1ynBxJOofyewQfkt/MwKBgQC7s5wcfi4GbZ3FFw0q4yG2QF+8GvjlRunM\nr04FccsPwAaUnYyGfUi894Zz/iQ08sl7ZTFO13unjq1SrbUVa+ryhaJiJBZiaORr\nMFKwttF1YKKwpK2brMuW1F29Gzt3qgKhNCpGVY25JkQf6ElESIzzTmiAyUteRAlZ\n60upKHJ1oQKBgAmbGVoCcjKb7Mb5qunnKO5W0tNpfW0GDBFAJlvOb0hqDBoEaMZG\n1xPB6e2GzSFtnsMABHpWrhgkz3FUPgbtBtcwZbFoj7hlX7e95X4toqw91iIGjxXz\nqRZ+NW6hKKIxOsZTvHTc49jgaulFiOodi804zQwGoca4rbnKSU9UdZINAoGATAYD\nRMcWfSQIsrsTajt0fAy2ucly5epC59RZFXtxc3+jKq5lLFOyEldu7awRniB32rKx\nte0w+DyhlsskfPiowHG/w2A6cMFrQr7fvxNM4u2w9zq71kG2c/CvxtgwzdbeGcy3\nEqW0MTl+fi3m/vEjpagsS308OYH1B6Z1jp4DPgECgYA+RK3cCK8g87nBkZV0pMiu\nSdNZs/hCYRA0luRYkFTaKES4DnlNTDIkrwkxa2T3kiO8rVEv0LMAZEDqZ152b9KM\nX2CfJUJC820C9PwOKMnESoi/6amoVoU68YAHrndeWg/ELI1fpT6SeQBpylCp/3vd\nZciowNmfAx72f6Ug4olEew==\n-----END PRIVATE KEY-----\n",
+  "client_email": "sorteknowledgeservice@sorteknowledgebase.iam.gserviceaccount.com",
+  "client_id": "113821818715592574920",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sorteknowledgeservice%40sorteknowledgebase.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
