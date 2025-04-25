@@ -1,6 +1,6 @@
 import chromadb
 from chromadb.config import Settings
-from llama_index.storage.index_store.chromadb import ChromaVectorStore
+from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index import VectorStoreIndex, Document
 
 # Persistent ChromaDB setup
