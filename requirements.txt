@@ -8,7 +8,6 @@ Pillow==10.2.0
 PyMuPDF==1.23.21
 chromadb==0.4.24
 llama-index==0.9.48
-llama-index-llms-openai==0.1.11
 
 # Google Drive API integration
 google-api-python-client==2.121.0
