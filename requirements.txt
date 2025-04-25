@@ -1,23 +1,23 @@
 # Core AI and Uplink
-anvil-uplink
-openai>=1.0.0
+anvil-uplink==0.4.2
+openai==1.14.3
 
 # Document ingestion and memory
-pytesseract
-Pillow
-PyMuPDF
-chromadb
-llama-index
-llama-index-llms-openai
+pytesseract==0.3.10
+Pillow==10.2.0
+PyMuPDF==1.23.21
+chromadb==0.4.24
+llama-index==0.9.48
+llama-index-llms-openai==0.1.11
 
 # Google Drive API integration
-google-api-python-client
-google-auth
-google-auth-oauthlib
+google-api-python-client==2.121.0
+google-auth==2.29.0
+google-auth-oauthlib==1.2.0
 
 # Web ingestion (reading websites)
-beautifulsoup4
-requests
+beautifulsoup4==4.12.2
+requests==2.31.0
 
 # Auto-sync scheduling
-schedule
+schedule==1.2.1
