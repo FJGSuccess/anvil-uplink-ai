@@ -1,6 +1,23 @@
-openai>=1.0.0
+# Core AI and Uplink
 anvil-uplink
+openai>=1.0.0
+
+# Document ingestion and memory
 pytesseract
 Pillow
 PyMuPDF
+chromadb
+llama-index
+llama-index-llms-openai
+
+# Google Drive API integration
+google-api-python-client
+google-auth
+google-auth-oauthlib
+
+# Web ingestion (reading websites)
+beautifulsoup4
 requests
+
+# Auto-sync scheduling
+schedule
