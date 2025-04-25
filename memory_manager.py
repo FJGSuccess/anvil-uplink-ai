@@ -5,7 +5,15 @@ from llama_index import VectorStoreIndex, Document
 
 # Persistent ChromaDB setup
 CHROMA_DIR = "./chroma_store"
-client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory=CHROMA_DIR))
+
+# NEW: Create the Chroma Client the modern way
+client = chromadb.Client(
+    Settings(
+        is_persistent=True,
+        persist_directory=CHROMA_DIR
+    )
+)
+
 collection = client.get_or_create_collection("sorte_memory")
 vector_store = ChromaVectorStore(chroma_collection=collection)
 index = VectorStoreIndex.from_vector_store(vector_store)
