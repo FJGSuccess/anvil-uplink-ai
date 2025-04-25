@@ -4,8 +4,12 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
+# Load credentials from service account JSON path stored in an environment variable
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-SERVICE_ACCOUNT_FILE = 'service_account.json'  # Secure upload needed
+SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE')  # NEW: dynamic loading
+
+if SERVICE_ACCOUNT_FILE is None:
+    raise Exception("❌ SERVICE_ACCOUNT_FILE environment variable not set!")
 
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES
