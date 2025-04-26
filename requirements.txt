@@ -1,6 +1,6 @@
 # Core AI and Uplink
 anvil-uplink==0.4.2
-openai==0.28.1  # 👈 Corrected - use OpenAI 0.28.1
+openai==1.14.3  # ✅ Correct modern OpenAI version
 python-dotenv==1.0.1
 
 # Document ingestion and memory
